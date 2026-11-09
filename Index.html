@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte Informático - Colegio San Gabriel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="h-full flex flex-col text-slate-800 bg-slate-100">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-900 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl shadow-md border-2 border-amber-400">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">Colegio San Gabriel</h2>
+                <p class="text-xs text-slate-500 mt-1">Departamento de Informática y Soporte Técnico</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" required placeholder="ejemplo@colegio.edu" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Contraseña</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-800">
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-blue-900 hover:bg-blue-800 text-white rounded-lg font-semibold text-sm transition-colors shadow-md">
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <div class="mt-6 p-4 bg-slate-50 rounded-xl text-xs text-slate-600 border border-slate-200 space-y-1">
+                <p class="font-bold text-slate-800 mb-1">Cuentas de acceso:</p>
+                <p>👤 <b>Administrador/Informática:</b> admin@colegio.edu / AdminSG2026!</p>
+                <p>🛠️ <b>Docente / Técnico:</b> tecnico@colegio.edu / DocenteSG2026!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP INTERFACE -->
+    <div id="appInterface" class="hidden flex h-screen overflow-hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 bg-blue-950 text-white flex flex-col justify-between hidden md:flex shrink-0">
+            <div>
+                <div class="p-5 border-b border-blue-900 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-900 rounded-lg text-amber-400 flex items-center justify-center text-xl border border-amber-400/50">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm leading-tight text-white">Colegio<br>San Gabriel</h1>
+                    </div>
+                </div>
+
+                <!-- MENÚ NAVEGACIÓN LATERAL -->
+                <nav class="p-4 space-y-2 text-sm font-medium">
+                    <button id="navBtnTasks" onclick="switchTab('tasks')" class="w-full flex items-center justify-between px-3 py-2.5 bg-blue-800 text-white rounded-xl shadow-sm transition-colors">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-list-check text-lg"></i> Tareas de Informática</span>
+                    </button>
+
+                    <button id="navBtnRequests" onclick="switchTab('requests')" class="w-full flex items-center justify-between px-3 py-2.5 text-blue-200 hover:bg-blue-900 hover:text-white rounded-xl transition-colors">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-headset text-lg"></i> Pedidos Docentes</span>
+                        <span id="sidebarBadge" class="hidden bg-rose-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-blue-900">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 text-rose-300 hover:bg-rose-950/50 hover:text-rose-200 rounded-xl transition-colors text-sm font-medium">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA -->
+        <div class="flex-grow flex flex-col overflow-y-auto custom-scrollbar">
+            
+            <!-- TOP BAR -->
+            <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-900 text-amber-400 font-bold flex items-center justify-center uppercase" id="userAvatar">U</div>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800" id="userDisplayName">Usuario</h2>
+                        <p class="text-xs text-slate-500" id="userRoleBadge">Rol</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="openRequestModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all active:scale-95">
+                        <i class="fa-solid fa-hand-holding-hand"></i>
+                        <span>Solicitar Ayuda Docente</span>
+                    </button>
+                    <button onclick="handleLogout()" class="md:hidden text-xs bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg font-medium border border-rose-200">Salir</button>
+                </div>
+            </header>
+
+            <main class="p-6 space-y-6">
+                
+                <!-- VISTA 1: TAREAS DE INFORMÁTICA -->
+                <div id="viewTasks" class="space-y-6">
+                    <div class="bg-gradient-to-r from-blue-900 to-indigo-800 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Organizador de Tareas de Informática</h2>
+                            <p class="text-xs text-blue-200 mt-1">Control técnico de mantenimiento, redes e infraestructura del colegio.</p>
+                        </div>
+
+                        <button type="button" onclick="openModal()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-semibold shadow-md transition-all flex items-center gap-2 text-sm active:scale-95 cursor-pointer">
+                            <i class="fa-solid fa-plus"></i> Nueva Tarea Interna
+                        </button>
+                    </div>
+
+                    <!-- METRICS -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-slate-500">Total Tareas</p>
+                                <p id="statTotal" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-layer-group"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-amber-600">Pendientes</p>
+                                <p id="statPending" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center"><i class="fa-regular fa-clock"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-blue-600">En Proceso</p>
+                                <p id="statProgress" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-spinner"></i></div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-emerald-600">Completadas</p>
+                                <p id="statCompleted" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                            </div>
+                            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-circle-check"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- TABLA -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center bg-slate-50">
+                            <div class="relative w-full md:w-80">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" id="searchInput" oninput="renderTable()" placeholder="Buscar trabajo o lugar..." class="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-800">
+                            </div>
+
+                            <div class="flex items-center gap-3 w-full md:w-auto">
+                                <select id="filterStatus" onchange="renderTable()" class="border border-slate-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none">
+                                    <option value="ALL">Todos los Estados</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="En Proceso">En Proceso</option>
+                                    <option value="Completada">Completada</option>
+                                </select>
+                                <select id="filterPriority" onchange="renderTable()" class="border border-slate-300 bg-white rounded-lg px-3 py-2 text-sm focus:outline-none">
+                                    <option value="ALL">Todas las Prioridades</option>
+                                    <option value="Alta">Alta</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Baja">Baja</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                                        <th class="py-3 px-4 w-1/3">Tarea / Trabajo</th>
+                                        <th class="py-3 px-4">Ubicación</th>
+                                        <th class="py-3 px-4">Responsable</th>
+                                        <th class="py-3 px-4">Prioridad</th>
+                                        <th class="py-3 px-4">Fecha / Hora</th>
+                                        <th class="py-3 px-4">Estado</th>
+                                        <th class="py-3 px-4 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="taskTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VISTA 2: SECCIÓN DE SOLICITUDES / PEDIDOS DOCENTES -->
+                <div id="viewRequests" class="hidden space-y-6">
+                    <div class="bg-gradient-to-r from-indigo-900 to-purple-800 rounded-2xl p-6 text-white shadow-md flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Centro de Solicitudes y Ayuda Docente</h2>
+                            <p class="text-xs text-indigo-200 mt-1">Pedidos de asistencia en clase, instalación de programas y soporte técnico rápido.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="requestsGrid"></div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL DE NUEVA TAREA INTERNA -->
+    <div id="taskModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+            <div class="px-6 py-4 bg-blue-900 text-white flex items-center justify-between">
+                <h3 id="modalTitle" class="text-lg font-bold">Nueva Tarea Interna</h3>
+                <button type="button" onclick="closeModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="taskId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Título de la Tarea *</label>
+                    <input type="text" id="taskTitle" placeholder="Ej. Formateo PC Sala de Profesores" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Descripción *</label>
+                    <textarea id="taskDesc" rows="3" placeholder="Detalle de los requerimientos..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Lugar *</label>
+                        <input type="text" id="taskLocation" placeholder="Ej. Aula 4B" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Responsable *</label>
+                        <input type="text" id="taskAssignee" placeholder="Ej. Informática" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Prioridad</label>
+                        <select id="taskPriority" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none bg-white">
+                            <option value="Baja">Baja</option>
+                            <option value="Media" selected>Media</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Fecha</label>
+                        <input type="date" id="taskExecDate" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Hora</label>
+                        <input type="time" id="taskExecTime" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Estado</label>
+                        <select id="taskStatus" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none bg-white">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Completada">Completada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm">Cancelar</button>
+                    <button type="button" onclick="saveTaskManual()" class="px-5 py-2 bg-blue-900 text-white rounded-lg text-sm font-semibold hover:bg-blue-800">Guardar Tarea</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SOLICITUD DE AYUDA DOCENTE -->
+    <div id="requestModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+            <div class="px-6 py-4 bg-indigo-700 text-white flex items-center justify-between">
+                <h3 class="text-base font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-headset"></i> Solicitud de Ayuda Informática
+                </h3>
+                <button type="button" onclick="closeRequestModal()" class="text-indigo-200 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nombre del Docente *</label>
+                    <input type="text" id="reqTeacher" placeholder="Ej. Prof. Carlos Ruiz" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Lugar / Aula *</label>
+                        <input type="text" id="reqLocation" placeholder="Ej. Sala 3 / Lab Informática" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Tipo de Ayuda *</label>
+                        <select id="reqType" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none bg-white">
+                            <option value="Impresora / Escáner">Impresora / Escáner</option>
+                            <option value="Instalación Software">Instalar Programa</option>
+                            <option value="Asistencia en Clase">Asistencia para Clase</option>
+                            <option value="Proyector / Audio">Proyector / Audio</option>
+                            <option value="Falla / Reparación">Falla o Reparación</option>
+                            <option value="Otro">Otro requerimiento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Urgencia</label>
+                    <select id="reqPriority" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none bg-white">
+                        <option value="Media" selected>Normal (Durante el día)</option>
+                        <option value="Alta">Urgente (Se requiere en clase)</option>
+                        <option value="Baja">Baja (Programar)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">¿Qué necesitas exactamente? *</label>
+                    <textarea id="reqDesc" rows="3" placeholder="Ej. La impresora no reconoce mi usuario..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-3 border-t border-slate-100">
+                    <button type="button" onclick="closeRequestModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm">Cancelar</button>
+                    <button type="button" id="btnSubmitReq" onclick="sendTeacherRequest()" class="px-5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-lg text-sm font-semibold shadow">Enviar a Informática</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        let currentUser = null;
+        let tasks = [];
+        let teacherRequests = [];
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            // NUEVAS CONTRASEÑAS SEGURAS
+            if (email === 'admin@colegio.edu' && password === 'AdminSG2026!') {
+                currentUser = { name: 'Encargado Informática', email: email, role: 'admin' };
+            } else if (email === 'tecnico@colegio.edu' && password === 'DocenteSG2026!') {
+                currentUser = { name: 'Profesor / Técnico', email: email, role: 'user' };
+            } else {
+                alert('Credenciales incorrectas');
+                return;
+            }
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appInterface').classList.remove('hidden');
+
+            document.getElementById('userDisplayName').innerText = currentUser.name;
+            document.getElementById('userRoleBadge').innerText = currentUser.role === 'admin' ? 'Administrador de IT' : 'Docente / Soporte';
+            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0);
+
+            loadTasks();
+            loadTeacherRequests();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('appInterface').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        // CONTROL DE PESTAÑAS (NAVEGACIÓN LATERAL)
+        function switchTab(tab) {
+            const viewTasks = document.getElementById('viewTasks');
+            const viewRequests = document.getElementById('viewRequests');
+            const btnTasks = document.getElementById('navBtnTasks');
+            const btnRequests = document.getElementById('navBtnRequests');
+
+            if (tab === 'tasks') {
+                viewTasks.classList.remove('hidden');
+                viewRequests.classList.add('hidden');
+                
+                btnTasks.className = "w-full flex items-center justify-between px-3 py-2.5 bg-blue-800 text-white rounded-xl shadow-sm transition-colors";
+                btnRequests.className = "w-full flex items-center justify-between px-3 py-2.5 text-blue-200 hover:bg-blue-900 hover:text-white rounded-xl transition-colors";
+            } else {
+                viewTasks.classList.add('hidden');
+                viewRequests.classList.remove('hidden');
+
+                btnRequests.className = "w-full flex items-center justify-between px-3 py-2.5 bg-blue-800 text-white rounded-xl shadow-sm transition-colors";
+                btnTasks.className = "w-full flex items-center justify-between px-3 py-2.5 text-blue-200 hover:bg-blue-900 hover:text-white rounded-xl transition-colors";
+            }
+        }
+
+        function loadTasks() {
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run.withSuccessHandler(function(data) {
+                    tasks = data || [];
+                    renderTable();
+                }).getTasksFromSheet();
+            } else {
+                renderTable();
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('taskTableBody');
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterPriority = document.getElementById('filterPriority').value;
+
+            tbody.innerHTML = '';
+
+            const filtered = tasks.filter(t => {
+                const matchSearch = t.title.toLowerCase().includes(search) || t.location.toLowerCase().includes(search);
+                const matchStatus = filterStatus === 'ALL' || t.status === filterStatus;
+                const matchPriority = filterPriority === 'ALL' || t.priority === filterPriority;
+                return matchSearch && matchStatus && matchPriority;
+            });
+
+            document.getElementById('statTotal').innerText = filtered.length;
+            document.getElementById('statPending').innerText = filtered.filter(t => t.status === 'Pendiente').length;
+            document.getElementById('statProgress').innerText = filtered.filter(t => t.status === 'En Proceso').length;
+            document.getElementById('statCompleted').innerText = filtered.filter(t => t.status === 'Completada').length;
+
+            filtered.forEach(task => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors align-top";
+
+                let priorityBadge = task.priority === 'Alta' ? '<span class="px-2.5 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">Alta</span>' :
+                                    task.priority === 'Media' ? '<span class="px-2.5 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">Media</span>' :
+                                    '<span class="px-2.5 py-0.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-full">Baja</span>';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-900">${task.title}</div>
+                        <div class="text-xs text-slate-500 mt-1">${task.description}</div>
+                    </td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-700"><i class="fa-solid fa-location-dot text-indigo-500 mr-1"></i>${task.location}</td>
+                    <td class="py-3 px-4 text-xs font-semibold text-slate-700">${task.assignee}</td>
+                    <td class="py-3 px-4">${priorityBadge}</td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-700">
+                        <div>${task.execDate}</div>
+                        <div class="text-indigo-600 font-semibold">${task.execTime || '09:00'} hs</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <select onchange="changeStatus('${task.id}', this.value)" class="text-xs font-bold px-2 py-1 rounded-lg border border-slate-300 bg-white">
+                            <option value="Pendiente" ${task.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                            <option value="En Proceso" ${task.status === 'En Proceso' ? 'selected' : ''}>En Proceso</option>
+                            <option value="Completada" ${task.status === 'Completada' ? 'selected' : ''}>Completada</option>
+                        </select>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="deleteTask('${task.id}')" class="text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openModal() {
+            document.getElementById('taskId').value = '';
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDesc').value = '';
+            document.getElementById('taskLocation').value = '';
+            document.getElementById('taskAssignee').value = '';
+            document.getElementById('taskExecDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('taskExecTime').value = '09:00';
+            document.getElementById('taskModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+
+        function saveTaskManual() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDesc').value.trim();
+            const location = document.getElementById('taskLocation').value.trim();
+            const assignee = document.getElementById('taskAssignee').value.trim();
+
+            if (!title || !description || !location || !assignee) {
+                alert('Por favor completa todos los campos.');
+                return;
+            }
+
+            const task = {
+                id: Date.now().toString(),
+                title: title,
+                description: description,
+                location: location,
+                assignee: assignee,
+                priority: document.getElementById('taskPriority').value,
+                createdDate: new Date().toISOString().split('T')[0],
+                execDate: document.getElementById('taskExecDate').value,
+                execTime: document.getElementById('taskExecTime').value,
+                status: document.getElementById('taskStatus').value,
+                evidence: ''
+            };
+
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run.withSuccessHandler(function() {
+                    closeModal();
+                    loadTasks();
+                }).saveTaskToSheet(task);
+            } else {
+                tasks.unshift(task);
+                closeModal();
+                renderTable();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            renderTable();
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run.deleteTaskFromSheet(id);
+            }
+        }
+
+        function changeStatus(id, newStatus) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.status = newStatus;
+                renderTable();
+                if (typeof google !== 'undefined' && google.script && google.script.run) {
+                    google.script.run.saveTaskToSheet(task);
+                }
+            }
+        }
+
+        // SOLICITUDES EN PANEL PRINCIPAL Y SIDEBAR
+        function loadTeacherRequests() {
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run.withSuccessHandler(function(data) {
+                    teacherRequests = data || [];
+                    renderRequestsView();
+                }).getTeacherRequests();
+            } else {
+                renderRequestsView();
+            }
+        }
+
+        function renderRequestsView() {
+            const grid = document.getElementById('requestsGrid');
+            const badge = document.getElementById('sidebarBadge');
+            
+            const pending = teacherRequests.filter(r => r.status === 'Pendiente');
+            
+            if (pending.length > 0) {
+                badge.innerText = pending.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (teacherRequests.length === 0) {
+                grid.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">No hay solicitudes registradas de profesores por el momento.</div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            teacherRequests.forEach(req => {
+                const card = document.createElement('div');
+                const isPending = req.status === 'Pendiente';
+
+                card.className = `p-5 rounded-2xl border ${isPending ? 'bg-white border-indigo-200 shadow-sm' : 'bg-slate-50 border-slate-200 opacity-75'} flex flex-col justify-between space-y-3`;
+
+                card.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg ${req.priority === 'Alta' ? 'bg-rose-100 text-rose-700' : 'bg-indigo-50 text-indigo-700'}">${req.device}</span>
+                            <span class="text-xs font-semibold ${isPending ? 'text-amber-600' : 'text-emerald-600'}">${req.status}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-sm">${req.teacher}</h4>
+                        <p class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-location-dot text-indigo-500 mr-1"></i>${req.location}</p>
+                        <p class="text-xs text-slate-700 pt-1 border-t border-slate-100">${req.description}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 text-xs border-t border-slate-100">
+                        <span class="text-slate-400">${req.date}</span>
+                        ${isPending ? 
+                            `<button onclick="resolveRequest('${req.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow-sm transition-colors">Atender Pedido</button>` : 
+                            `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-check mr-1"></i>Atendido</span>`}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openRequestModal() {
+            document.getElementById('reqTeacher').value = currentUser ? currentUser.name : '';
+            document.getElementById('reqLocation').value = '';
+            document.getElementById('reqDesc').value = '';
+            document.getElementById('requestModal').classList.remove('hidden');
+        }
+
+        function closeRequestModal() {
+            document.getElementById('requestModal').classList.add('hidden');
+        }
+
+        function sendTeacherRequest() {
+            const teacher = document.getElementById('reqTeacher').value.trim();
+            const location = document.getElementById('reqLocation').value.trim();
+            const type = document.getElementById('reqType').value;
+            const description = document.getElementById('reqDesc').value.trim();
+
+            if (!teacher || !location || !description) {
+                alert('Por favor completa todos los campos.');
+                return;
+            }
+
+            const reqData = {
+                id: Date.now().toString(),
+                teacher: teacher,
+                location: location,
+                device: type,
+                description: description,
+                priority: document.getElementById('reqPriority').value,
+                date: new Date().toISOString().split('T')[0],
+                status: 'Pendiente'
+            };
+
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run.withSuccessHandler(function() {
+                    closeRequestModal();
+                    loadTeacherRequests();
+                }).saveTeacherRequest(reqData);
+            } else {
+                teacherRequests.unshift(reqData);
+                closeRequestModal();
+                renderRequestsView();
+            }
+        }
+
+        function resolveRequest(reqId) {
+            const req = teacherRequests.find(r => r.id === reqId);
+            if (req) {
+                req.status = 'Atendido';
+                renderRequestsView();
+                if (typeof google !== 'undefined' && google.script && google.script.run) {
+                    google.script.run.updateRequestStatus(reqId, 'Atendido');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
